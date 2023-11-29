@@ -234,9 +234,6 @@ public class RNPushNotificationHelper {
                     case "max":
                         priority = NotificationCompat.PRIORITY_MAX;
                         break;
-                    case "high":
-                        priority = NotificationCompat.PRIORITY_HIGH;
-                        break;
                     case "low":
                         priority = NotificationCompat.PRIORITY_LOW;
                         break;
@@ -246,6 +243,7 @@ public class RNPushNotificationHelper {
                     case "default":
                         priority = NotificationCompat.PRIORITY_DEFAULT;
                         break;
+                    case "high":
                     default:
                         priority = NotificationCompat.PRIORITY_HIGH;
                 }
@@ -520,7 +518,7 @@ public class RNPushNotificationHelper {
                     }
 
 
-                    Intent actionIntent = new Intent(context, RNPushNotificationActions.class);
+                    Intent actionIntent = new Intent(context, getMainActivityClass());
                     actionIntent.setAction(packageName + ".ACTION_" + i);
 
                     actionIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -533,9 +531,9 @@ public class RNPushNotificationHelper {
                         intent.putExtra("message_id", messageId);
                     }
 
-                    int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT;
+                    int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE : PendingIntent.FLAG_UPDATE_CURRENT;
 
-                    PendingIntent pendingActionIntent = PendingIntent.getBroadcast(context, notificationID, actionIntent, flags);
+                    PendingIntent pendingActionIntent = PendingIntent.getActivity(context, notificationID, actionIntent, flags);
 
                     if(action.equals("ReplyInput")){
                         //Action with inline reply
@@ -585,6 +583,14 @@ public class RNPushNotificationHelper {
             if (!(this.isApplicationInForeground() && bundle.getBoolean("ignoreInForeground"))) {
                 Notification info = notification.build();
                 info.defaults |= Notification.DEFAULT_LIGHTS;
+
+                if (bundle.containsKey("insistent") && bundle.getBoolean("insistent")){
+                    info.flags |= Notification.FLAG_INSISTENT;
+                }
+
+                if (bundle.containsKey("ongoing") && bundle.getBoolean("ongoing")){
+                    info.flags |= Notification.FLAG_ONGOING_EVENT;
+                }
 
                 if (bundle.containsKey("tag")) {
                     String tag = bundle.getString("tag");
